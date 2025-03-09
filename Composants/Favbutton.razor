@@ -1,0 +1,35 @@
+﻿@using APIEstherMM.Models
+@using APIEstherMM.Services
+@inject StockageLocal stockageLocal
+
+<button @onclick="ToggleFavorite">
+    @(IsFavorite ? "❌ Retirer des Favoris" : "⭐ Ajouter aux Favoris")
+</button>
+
+@code {
+    [Parameter, EditorRequired]
+    public DataItem item { get; set; }
+
+    private bool IsFavorite;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var favorites = await stockageLocal.GetFavoritesAsync();
+        IsFavorite = favorites.Any(f => f.Id == item.Id);
+    }
+
+    private async Task ToggleFavorite()
+    {
+        if (IsFavorite)
+        {
+            await stockageLocal.RemoveFavoriteAsync(item.Id);
+        }
+        else
+        {
+            await stockageLocal.AddFavoriteAsync(item);
+        }
+
+        IsFavorite = !IsFavorite;
+        StateHasChanged(); // Forcer la mise à jour de l'affichage
+    }
+}
